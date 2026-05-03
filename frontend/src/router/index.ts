@@ -7,61 +7,61 @@ let setupChecked = false
 let setupRequired = false
 
 export function resetSetupCheck() {
-  setupChecked = false
-  setupRequired = false
+    setupChecked = false
+    setupRequired = false
 }
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/login',
-      component: () => import('@/views/LoginView.vue'),
-      meta: { public: true },
-    },
-    {
-      path: '/setup',
-      component: () => import('@/views/SetupView.vue'),
-      meta: { public: true },
-    },
-    {
-      path: '/',
-      component: DefaultLayout,
-      children: [
-        { path: '', component: () => import('@/views/DashboardView.vue') },
-        { path: 'printers', component: () => import('@/views/PrintersView.vue') },
-        { path: 'filaments', component: () => import('@/views/FilamentsView.vue') },
-        { path: 'users', component: () => import('@/views/UsersView.vue') },
-        { path: 'settings', component: () => import('@/views/DashboardView.vue') },
-        { path: 'help', component: () => import('@/views/DashboardView.vue') },
-      ],
-    },
-  ],
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes: [
+        {
+            path: '/login',
+            component: () => import('@/views/LoginView.vue'),
+            meta: { public: true },
+        },
+        {
+            path: '/setup',
+            component: () => import('@/views/SetupView.vue'),
+            meta: { public: true },
+        },
+        {
+            path: '/',
+            component: DefaultLayout,
+            children: [
+                { path: '', component: () => import('@/views/DashboardView.vue') },
+                { path: 'printers', component: () => import('@/views/PrintersView.vue') },
+                { path: 'filaments', component: () => import('@/views/FilamentsView.vue') },
+                { path: 'users', component: () => import('@/views/UsersView.vue') },
+                { path: 'settings', component: () => import('@/views/DashboardView.vue') },
+                { path: 'help', component: () => import('@/views/DashboardView.vue') },
+            ],
+        },
+    ],
 })
 
 router.beforeEach(async (to) => {
-  const auth = useAuthStore()
+    const auth = useAuthStore()
 
-  if (!setupChecked) {
-    try {
-      const { data } = await authApi.checkSetup()
-      setupRequired = data.setup_required
-      setupChecked = true
-    } catch {}
-  }
+    if (!setupChecked) {
+        try {
+            const { data } = await authApi.checkSetup()
+            setupRequired = data.setup_required
+            setupChecked = true
+        } catch {}
+    }
 
-  if (setupRequired && to.path !== '/setup') return '/setup'
-  if (!setupRequired && to.path === '/setup') return '/login'
+    if (setupRequired && to.path !== '/setup') return '/setup'
+    if (!setupRequired && to.path === '/setup') return '/login'
 
-  if (to.meta.public) return true
+    if (to.meta.public) return true
 
-  if (auth.token && !auth.user) {
-    await auth.init()
-  }
+    if (auth.token && !auth.user) {
+        await auth.init()
+    }
 
-  if (!auth.isAuthenticated) return '/login'
+    if (!auth.isAuthenticated) return '/login'
 
-  return true
+    return true
 })
 
 export default router
